@@ -1,9 +1,9 @@
 use std::io;
-use std::path::PathBuf;
+use std::path::Path;
 use crate::config::Project;
 
-mod config;
+pub mod config;
 
-pub fn open_project(root: &PathBuf) -> io::Result<Project> {
+pub fn open_project<P: AsRef<Path>>(root: P) -> io::Result<Project> {
     Project::read(root)
 }

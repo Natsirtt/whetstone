@@ -9,7 +9,7 @@ exclude = ["lib/**/*"]
 
 [features]
 default = []
-with-gui = ["iced"]
+#with-gui = ["iced"]
 
 [[bin]]
 name = "whetstone"
@@ -28,9 +28,9 @@ lto = true
 debug-assertions = false
 
 [dependencies]
-whetstone-lib = { version = "0.1", path = "lib" }
+whetstone-lib = { version = "0.1", path = "lib", features = ["with-perforce", "with-rdedup"] }
 clap = { version = "4.5", features = ["derive"] }
 slog = { version = "2.7", features = ["max_level_trace", "release_max_level_trace"]}
 slog-term = "2.9"
 slog-async = "2.8"
-iced = { version = "0.13", features = ["default"], optional = true }
+#iced = { version = "0.13", features = ["default"], optional = true }

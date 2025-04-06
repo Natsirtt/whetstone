@@ -1,8 +1,9 @@
 use std::{io, process};
-use std::path::PathBuf;
 use clap::{Parser, Subcommand};
 
 use whetstone_lib as whetstone;
+use whetstone::config::module::Engine;
+use whetstone::config::module::Module;
 
 #[derive(Debug, Parser)]
 #[clap(about = "Heterogeneous project dependencies manager. Keep your projects sharply up-to-date!")]
@@ -23,9 +24,18 @@ enum Command {
 fn run() -> io::Result<()> {
     let args = Args::parse();
 
+    let foo = whetstone::config::Project::new("foobar".to_string(), args.directory.clone(), vec![
+        Module {
+            name: "Binaries".into(),
+            engine: Engine::Rdedup
+        }
+    ])?;
+    foo.write()?;
+
     match args.command {
         Command::Sync => {
-            let project = whetstone::open_project(&PathBuf::from(args.directory))?;
+            let project = whetstone::open_project(args.directory)?;
+            println!("{:?}", project);
         }
     }
 
