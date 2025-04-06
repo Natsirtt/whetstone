@@ -1,7 +1,36 @@
 [package]
 name = "whetstone"
+description = "An ecosystem-agnostic project dependencies manager especially fitting projects with numerous binary and content dependencies with a relationship to each other. Keep your projects sharply up-to-date with Whetstone!"
+license = "MIT"
 version = "0.1.0"
 edition = "2024"
+repository = "https://github.com/Natsirtt/whetstone"
+exclude = ["lib/**/*"]
+
+[features]
+default = []
+with-gui = ["iced"]
+
+[[bin]]
+name = "whetstone"
+path = "src/main.rs"
+
+[profile.dev]
+opt-level = 0
+debug = true
+lto = false
+debug-assertions = true
+
+[profile.release]
+opt-level = 3
+debug = true
+lto = true
+debug-assertions = false
 
 [dependencies]
-
+whetstone-lib = { version = "0.1", path = "lib" }
+clap = { version = "4.5", features = ["derive"] }
+slog = { version = "2.7", features = ["max_level_trace", "release_max_level_trace"]}
+slog-term = "2.9"
+slog-async = "2.8"
+iced = { version = "0.13", features = ["default"], optional = true }
