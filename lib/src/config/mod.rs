@@ -1,6 +1,10 @@
 //! Config: settings and options for a Whetstone project which may be serialized/deserialized.
 
 pub mod module;
+#[cfg(feature = "with-rdedup")]
+pub mod rdedup;
+#[cfg(feature = "with-perforce")]
+pub mod perforce;
 
 use std::{fs, io};
 use std::path::{Path, PathBuf};
@@ -14,14 +18,16 @@ const CONFIG_FILE: &str = "whetstone.yml";
 pub struct Project {
     name: String,
     root: PathBuf,
+    root_module: String,
     modules: Vec<Module>,
 }
 
 impl Project {
-    pub fn new<P: AsRef<Path>>(name: String, root: P, modules: Vec<Module>) -> io::Result<Self> {
+    pub fn new<P: AsRef<Path>>(name: String, root: P, root_module: String, modules: Vec<Module>) -> io::Result<Self> {
         Ok(Project {
             name,
             root: dunce::canonicalize(root)?,
+            root_module,
             modules,
         })
     }
@@ -34,8 +40,8 @@ impl Project {
             }
         }).ok_or(io::Error::new(io::ErrorKind::NotFound, format!("{} not found in {}", CONFIG_FILE, root_path.as_ref().display())))?;
 
-        let project: Project = serde_yaml::from_str(fs::read_to_string(whetstone_config.unwrap().path())?.as_str()).map_err(|_| {
-            io::Error::new(io::ErrorKind::InvalidData, "Ill-formed project config file!")
+        let project: Project = serde_yaml::from_str(fs::read_to_string(whetstone_config.unwrap().path())?.as_str()).map_err(|e| {
+            io::Error::new(io::ErrorKind::InvalidData, format!("Ill-formed project config file: {}", e))
         })?;
 
         Ok(project)
