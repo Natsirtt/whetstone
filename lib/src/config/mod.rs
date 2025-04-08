@@ -14,25 +14,26 @@ use crate::config::module::Module;
 const CONFIG_FILE: &str = "whetstone.yml";
 
 /// A representation of a valid Whetstone project.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Project {
-    name: String,
-    root: PathBuf,
-    root_module: String,
-    modules: Vec<Module>,
+    pub(crate) name: String,
+    pub(crate) root: PathBuf,
+    // Root modules initiate sync chains.
+    pub(crate) root_modules: Vec<String>,
+    pub(crate) modules: Vec<Module>,
 }
 
 impl Project {
-    pub fn new<P: AsRef<Path>>(name: String, root: P, root_module: String, modules: Vec<Module>) -> io::Result<Self> {
+    pub fn new<P: AsRef<Path>>(name: String, root: P, root_modules: Vec<String>, modules: Vec<Module>) -> io::Result<Self> {
         Ok(Project {
             name,
             root: dunce::canonicalize(root)?,
-            root_module,
+            root_modules,
             modules,
         })
     }
 
-    pub fn read<P: AsRef<Path>>(root_path: P) -> io::Result<Self> {
+    pub fn read_from_config<P: AsRef<Path>>(root_path: P) -> io::Result<Self> {
         let whetstone_config = fs::read_dir(&root_path)?.find(|item| {
             match item {
                 Ok(entry) => entry.file_name() == CONFIG_FILE,
@@ -47,7 +48,7 @@ impl Project {
         Ok(project)
     }
 
-    pub fn write(&self) -> io::Result<()> {
+    pub fn write_to_config(&self) -> io::Result<()> {
         fs::write(self.root.join(CONFIG_FILE), serde_yaml::to_string(self).map_err(|e|{
             io::Error::new(io::ErrorKind::InvalidData, format!("Failed to write project {} to disk: {}", self.name, e))
         })?.as_bytes())

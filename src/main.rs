@@ -1,5 +1,5 @@
 use std::{io, process};
-use clap::{Parser, Subcommand};
+use clap::{Args, Parser, Subcommand};
 use url::Url;
 use whetstone_lib as whetstone;
 use whetstone::config::module::Engine;
@@ -8,7 +8,7 @@ use whetstone_lib::config::rdedup::{CachingStrategy, Repository};
 
 #[derive(Debug, Parser)]
 #[clap(about = "Heterogeneous project dependencies manager. Keep your projects sharply up-to-date!")]
-struct Args {
+struct CliArgs {
     #[clap(name = "dir", short, long, default_value = ".")]
     directory: std::ffi::OsString,
 
@@ -16,24 +16,28 @@ struct Args {
     command: Command,
 }
 
+#[derive(Debug, Args)]
+struct SyncArgs {
+    #[clap(short, help = "Forces all components to forcibly sync to this version even if they already think they are up-to-date")]
+    force: bool,
+}
+
 #[derive(Debug, Subcommand)]
 //#[clap(setting = clap::AppSettings::DeriveDisplayOrder)]
 enum Command {
-    Sync,
+    Sync(SyncArgs),
 }
 
 fn run() -> io::Result<()> {
-    let args = Args::parse();
+    let args = CliArgs::parse();
 
-    let foo = whetstone::config::Project::new("foobar".to_string(), args.directory.clone(), "Content".into(), vec![
+    let foo = whetstone::config::Project::new("foobar".to_string(), args.directory.clone(), vec!["Content".into()], vec![
         Module {
             name: "Content".into(),
             engine: Engine::Perforce {
                 port: "ssl:vcs.knifeedgestudios.com".into(),
                 stream: "//nush/unstable/dev".into(),
             },
-            dependencies: vec!["Binaries".into()],
-            scopes: vec!["Content/".into()]
         },
         Module {
             name: "Binaries".into(),
@@ -44,16 +48,15 @@ fn run() -> io::Result<()> {
                     max_size: 10737418240, // 10 GB
                 },
             }),
-            dependencies: vec![],
-            scopes: vec!["Binaries/".into()]
         },
     ])?;
-    foo.write()?;
+    foo.write_to_config()?;
 
     match args.command {
-        Command::Sync => {
+        Command::Sync(sub_args) => {
             let project = whetstone::open_project(args.directory)?;
             println!("{:?}", project);
+            println!("Sync. Force? {}", sub_args.force);
         }
     }
 
