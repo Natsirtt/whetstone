@@ -1,6 +1,5 @@
 use std::io;
 use std::path::Path;
-use crate::config::module::Module;
 use crate::config::Project;
 
 pub mod config;
@@ -14,13 +13,7 @@ pub fn open_project<P: AsRef<Path>>(root: P) -> io::Result<Project> {
 pub trait Engine: Send + Sync {
     fn new_worker(&self, engine: &config::module::Engine) -> io::Result<Box<dyn EngineWorker>>;
 }
+
 pub trait EngineWorker: Send {
     fn sync(&self, version: Version, force: bool) -> io::Result<()>;
-}
-
-pub fn sync(project: &Project, version: Version, force: bool) -> io::Result<()> {
-    for module in &project.modules {
-
-    }
-    Ok(())
 }
