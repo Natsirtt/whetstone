@@ -34,23 +34,28 @@ fn run() -> io::Result<()> {
     let foo = whetstone::config::Project::new("foobar".to_string(), args.directory.clone(), vec!["Content".into()], vec![
         Module {
             name: "Content".into(),
-            engine: Engine::Perforce {
-                port: "ssl:vcs.knifeedgestudios.com".into(),
-                stream: "//nush/unstable/dev".into(),
-            },
         },
         Module {
             name: "Binaries".into(),
-            engine: Engine::Rdedup(Repository::HttpServer {
-                url: Url::parse("https://knifeedgestudios.com/nush/").unwrap().into(),
-                caching_strategy: CachingStrategy::Local {
-                    path: ".rdedup".into(),
-                    max_size: 10737418240, // 10 GB
-                },
-            }),
         },
     ])?;
     foo.write_to_config()?;
+    let content_engine = Engine::Perforce {
+        port: "ssl:vcs.knifeedgestudios.com".into(),
+        stream: "//nush/unstable/dev".into(),
+    };
+    let binaries_engine = Engine::Rdedup(Repository::HttpServer {
+        url: Url::parse("https://knifeedgestudios.com/nush/").unwrap().into(),
+        caching_strategy: CachingStrategy::Local {
+            path: ".rdedup".into(),
+            max_size: 10737418240, // 10 GB
+        },
+    });
+    // TODO instead of naming the config file from their engine-type, like perforce.yml, we should
+    // give a module context too and it should be [module_name].yml; so we could have several perforce
+    // modules for instance.
+    content_engine.write_to_config(&foo)?;
+    binaries_engine.write_to_config(&foo)?;
 
     match args.command {
         Command::Sync(sub_args) => {
@@ -65,7 +70,7 @@ fn run() -> io::Result<()> {
 
 fn main() {
     if let Err(e) = run() {
-        eprintln!("{}", e);
+        eprintln!("Whetstone exited with error: {}", e);
         process::exit(1);
     }
 }
