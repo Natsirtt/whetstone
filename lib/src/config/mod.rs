@@ -20,11 +20,11 @@ pub struct Project {
     pub(crate) root: PathBuf,
     // Root modules initiate sync chains.
     pub(crate) root_modules: Vec<String>,
-    pub(crate) modules: Vec<Module>,
+    pub(crate) modules: Vec<String>,
 }
 
 impl Project {
-    pub fn new<P: AsRef<Path>>(name: String, root: P, root_modules: Vec<String>, modules: Vec<Module>) -> io::Result<Self> {
+    pub fn new<P: AsRef<Path>>(name: String, root: P, root_modules: Vec<String>, modules: Vec<String>) -> io::Result<Self> {
         Ok(Project {
             name,
             root: dunce::canonicalize(root)?,
