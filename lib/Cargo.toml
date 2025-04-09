@@ -30,6 +30,6 @@ serde = { version = "1.0", features = ["derive"] }
 serde_yaml = "0.8"
 p4-cmd = { git = "https://github.com/Natsirtt/p4-cmd.git", optional = true }
 rdedup-lib = { git = "https://github.com/Natsirtt/rdedup.git", features = ["default"], optional = true }
-dunce = "1.0.5"
-strum = { version = "0.27", features = ["derive"] }
-url = "2.5.4"
+tempfile = "3.19"
+tar = "0.4"
+pipe = "0.4.0"

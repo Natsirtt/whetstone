@@ -6,6 +6,7 @@ use whetstone::config::Engine;
 use whetstone::config::Module;
 use whetstone::config::rdedup::{CachingStrategy, Repository};
 use whetstone::config::perforce::StreamDefinition;
+use whetstone_lib::config;
 
 #[derive(Debug, Parser)]
 #[clap(about = "Heterogeneous project dependencies manager. Keep your projects sharply up-to-date!")]
@@ -32,11 +33,11 @@ enum Command {
 fn run() -> io::Result<()> {
     let args = CliArgs::parse();
 
-    let foo = whetstone::config::Project::new("foobar".to_string(), args.directory.clone(), vec!["Content".into()], vec![
+    let foo = whetstone::config::Project::new("foobar".to_string(), vec!["Content".into()], vec![
             "Content".into(),
             "Binaries".into(),
     ])?;
-    foo.write_to_config()?;
+    foo.write_to_config(&args.directory)?;
     let content_module = Module {
         name: "Content".into(),
         engine: Engine::Perforce(StreamDefinition {
@@ -46,19 +47,22 @@ fn run() -> io::Result<()> {
     };
     let binaries_module: Module = Module {
         name: "Binaries".into(),
-        engine: Engine::Rdedup(Repository::HttpServer {
-            url: Url::parse("https://buildstore.knifeedgestudios.com/nush/").unwrap().into(),
-            caching_strategy: CachingStrategy::Local {
-                path: ".rdedup".into(),
-                max_size: 10737418240, // 10 GB
+        engine: Engine::Rdedup(config::rdedup::Config {
+        root: ".".into(),
+            repository: Repository::HttpServer {
+                url: Url::parse("https://buildstore.knifeedgestudios.com/nush/").unwrap().into(),
+                caching_strategy: CachingStrategy::Local {
+                    path: ".rdedup".into(),
+                    max_size: 10737418240, // 10 GB
+                }
             },
         })
     };
     // TODO instead of naming the config file from their engine-type, like perforce.yml, we should
     // give a module context too and it should be [module_name].yml; so we could have several perforce
     // modules for instance.
-    content_module.write_to_config(&foo)?;
-    binaries_module.write_to_config(&foo)?;
+    content_module.write_to_config(&args.directory)?;
+    binaries_module.write_to_config(&args.directory)?;
 
     match args.command {
         Command::Sync(sub_args) => {
