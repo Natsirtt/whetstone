@@ -32,17 +32,16 @@ fn run() -> io::Result<()> {
     let args = CliArgs::parse();
 
     let foo = whetstone::config::Project::new("foobar".to_string(), args.directory.clone(), vec!["Content".into()], vec![
-        Module {
-            name: "Content".into(),
-        },
-        Module {
-            name: "Binaries".into(),
-        },
+            "Content".into(),
+            "Binaries".into(),
     ])?;
     foo.write_to_config()?;
-    let content_engine = Engine::Perforce {
-        port: "ssl:vcs.knifeedgestudios.com".into(),
-        stream: "//nush/unstable/dev".into(),
+    let content_module = Module {
+        name: "Content".into(),
+        engine: Engine::Perforce {
+            port: "ssl:vcs.knifeedgestudios.com".into(),
+            stream: "//nush/unstable/dev".into(),
+        }
     };
     let binaries_engine = Engine::Rdedup(Repository::HttpServer {
         url: Url::parse("https://knifeedgestudios.com/nush/").unwrap().into(),
