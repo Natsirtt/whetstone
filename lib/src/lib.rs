@@ -3,6 +3,7 @@ use std::path::Path;
 use crate::config::Project;
 
 pub mod config;
+pub mod engines;
 
 struct Version(String);
 
@@ -11,7 +12,7 @@ pub fn open_project<P: AsRef<Path>>(root: P) -> io::Result<Project> {
 }
 
 pub trait Engine: Send + Sync {
-    fn new_worker(&self, engine: &config::module::Engine) -> io::Result<Box<dyn EngineWorker>>;
+    fn new_worker(&self) -> io::Result<Box<dyn EngineWorker>>;
 }
 
 pub trait EngineWorker: Send {

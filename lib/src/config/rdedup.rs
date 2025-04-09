@@ -2,6 +2,7 @@ use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[cfg(feature = "with-rdedup")]
 pub enum CachingStrategy {
     None,
     Local {
@@ -11,6 +12,7 @@ pub enum CachingStrategy {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[cfg(feature = "with-rdedup")]
 pub enum Repository {
     Directory {
         path: PathBuf,

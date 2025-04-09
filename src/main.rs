@@ -2,9 +2,10 @@ use std::{io, process};
 use clap::{Args, Parser, Subcommand};
 use url::Url;
 use whetstone_lib as whetstone;
-use whetstone::config::module::Engine;
-use whetstone::config::module::Module;
-use whetstone_lib::config::rdedup::{CachingStrategy, Repository};
+use whetstone::config::Engine;
+use whetstone::config::Module;
+use whetstone::config::rdedup::{CachingStrategy, Repository};
+use whetstone::config::perforce::StreamDefinition;
 
 #[derive(Debug, Parser)]
 #[clap(about = "Heterogeneous project dependencies manager. Keep your projects sharply up-to-date!")]
@@ -38,15 +39,15 @@ fn run() -> io::Result<()> {
     foo.write_to_config()?;
     let content_module = Module {
         name: "Content".into(),
-        engine: Engine::Perforce {
+        engine: Engine::Perforce(StreamDefinition {
             port: "ssl:vcs.knifeedgestudios.com".into(),
             stream: "//nush/unstable/dev".into(),
-        }
+        })
     };
     let binaries_module: Module = Module {
         name: "Binaries".into(),
         engine: Engine::Rdedup(Repository::HttpServer {
-            url: Url::parse("https://knifeedgestudios.com/nush/").unwrap().into(),
+            url: Url::parse("https://buildstore.knifeedgestudios.com/nush/").unwrap().into(),
             caching_strategy: CachingStrategy::Local {
                 path: ".rdedup".into(),
                 max_size: 10737418240, // 10 GB
