@@ -11,7 +11,8 @@ use std::path::{Path, PathBuf};
 use serde::{Deserialize, Serialize};
 use crate::config::module::Module;
 
-const CONFIG_FILE: &str = "whetstone.yml";
+const DIRECTORY: &str = ".whetstone";
+const CONFIG_FILE: &str = "Whetstone.yml";
 
 /// A representation of a valid Whetstone project.
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -33,15 +34,21 @@ impl Project {
         })
     }
 
-    pub fn read_from_config<P: AsRef<Path>>(root_path: P) -> io::Result<Self> {
-        let whetstone_config = fs::read_dir(&root_path)?.find(|item| {
-            match item {
-                Ok(entry) => entry.file_name() == CONFIG_FILE,
-                Err(_) => false,
-            }
-        }).ok_or(io::Error::new(io::ErrorKind::NotFound, format!("{} not found in {}", CONFIG_FILE, root_path.as_ref().display())))?;
+    pub fn get_config_directory(&self) -> PathBuf {
+        self.root.join(DIRECTORY)
+    }
 
-        let project: Project = serde_yaml::from_str(fs::read_to_string(whetstone_config.unwrap().path())?.as_str()).map_err(|e| {
+    fn get_config_file(&self) -> PathBuf {
+        self.get_config_directory().join(CONFIG_FILE)
+    }
+
+    pub fn read_from_config<P: AsRef<Path>>(root_path: P) -> io::Result<Self> {
+        let config_file = PathBuf::from(root_path.as_ref()).join(DIRECTORY).join(CONFIG_FILE);
+        if !Path::is_file(&config_file) {
+            return Err(io::Error::new(io::ErrorKind::NotFound, format!("Could not find file {}", config_file.to_string_lossy())));
+        }
+
+        let project: Project = serde_yaml::from_str(fs::read_to_string(config_file)?.as_str()).map_err(|e| {
             io::Error::new(io::ErrorKind::InvalidData, format!("Ill-formed project config file: {}", e))
         })?;
 
@@ -49,7 +56,16 @@ impl Project {
     }
 
     pub fn write_to_config(&self) -> io::Result<()> {
-        fs::write(self.root.join(CONFIG_FILE), serde_yaml::to_string(self).map_err(|e|{
+        let binding = self.get_config_directory();
+        let directory = binding.as_path();
+        if !Path::is_dir(directory) {
+            if Path::is_file(directory) {
+                return Err(io::Error::new(io::ErrorKind::AlreadyExists, format!("Cannot create {} directory over existing file", directory.to_string_lossy())));
+            }
+            fs::create_dir_all(directory)?;
+        }
+        assert!(Path::is_dir(directory));
+        fs::write(self.get_config_file(), serde_yaml::to_string(self).map_err(|e|{
             io::Error::new(io::ErrorKind::InvalidData, format!("Failed to write project {} to disk: {}", self.name, e))
         })?.as_bytes())
     }

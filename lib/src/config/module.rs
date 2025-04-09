@@ -18,7 +18,7 @@ pub enum Engine {
 impl Engine {
     fn get_config_file(&self, project_context: &Project) -> PathBuf {
         let as_string: &'static str = self.into();
-        project_context.root.join(format!("{}.yml", as_string))
+        project_context.get_config_directory().join(format!("{}.yml", as_string))
     }
     pub fn read_from_config(&self, project_context: &Project) -> io::Result<Self> {
         let file = self.get_config_file(project_context);
