@@ -43,18 +43,21 @@ fn run() -> io::Result<()> {
             stream: "//nush/unstable/dev".into(),
         }
     };
-    let binaries_engine = Engine::Rdedup(Repository::HttpServer {
-        url: Url::parse("https://knifeedgestudios.com/nush/").unwrap().into(),
-        caching_strategy: CachingStrategy::Local {
-            path: ".rdedup".into(),
-            max_size: 10737418240, // 10 GB
-        },
-    });
+    let binaries_module: Module = Module {
+        name: "Binaries".into(),
+        engine: Engine::Rdedup(Repository::HttpServer {
+            url: Url::parse("https://knifeedgestudios.com/nush/").unwrap().into(),
+            caching_strategy: CachingStrategy::Local {
+                path: ".rdedup".into(),
+                max_size: 10737418240, // 10 GB
+            },
+        })
+    };
     // TODO instead of naming the config file from their engine-type, like perforce.yml, we should
     // give a module context too and it should be [module_name].yml; so we could have several perforce
     // modules for instance.
-    content_engine.write_to_config(&foo)?;
-    binaries_engine.write_to_config(&foo)?;
+    content_module.write_to_config(&foo)?;
+    binaries_module.write_to_config(&foo)?;
 
     match args.command {
         Command::Sync(sub_args) => {
