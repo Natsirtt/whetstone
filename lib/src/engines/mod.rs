@@ -14,7 +14,7 @@ pub trait Engine: Send + Sync {
 }
 
 pub trait EngineWorker: Send {
-    fn sync(&self, root: &PathBuf, version: &dyn ModuleVersion, force: bool) -> io::Result<()>;
+    fn sync(&self, root: &PathBuf, version: &ModuleVersion, force: bool) -> io::Result<()>;
 
     // TODO start writing up a Whetstone error domain instead of using io everywhere?
     fn test_connection(&self) -> io::Result<()>;

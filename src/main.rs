@@ -6,7 +6,7 @@ use whetstone::config::Engine;
 use whetstone::config::Module;
 use whetstone::config::rdedup::{CachingStrategy, Repository};
 use whetstone::config::perforce::StreamDefinition;
-use whetstone_lib::config;
+use whetstone_lib::{config, Project};
 
 #[derive(Debug, Parser)]
 #[clap(about = "Heterogeneous project dependencies manager. Keep your projects sharply up-to-date!")]
@@ -33,7 +33,7 @@ enum Command {
 fn run() -> io::Result<()> {
     let args = CliArgs::parse();
 
-    let foo = whetstone::config::Project::new("foobar".to_string(), vec!["Content".into()], vec![
+    let foo = whetstone::config::Project::new("Nush".to_string(), config::Infrastructure::Default, "Binaries".into(), vec![
             "Content".into(),
             "Binaries".into(),
     ])?;
@@ -66,6 +66,8 @@ fn run() -> io::Result<()> {
 
     match args.command {
         Command::Sync(sub_args) => {
+            let project = Project::open(&args.directory)?;
+            println!("{}", project);
         }
     }
 

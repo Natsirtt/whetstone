@@ -66,9 +66,9 @@ impl Engine for Rdedup {
 }
 
 impl EngineWorker for RdedupWorker {
-    fn sync(&self, root: &PathBuf, version: &dyn ModuleVersion, force: bool) -> io::Result<()> {
+    fn sync(&self, root: &PathBuf, version: &ModuleVersion, force: bool) -> io::Result<()> {
         let (read, mut write) = pipe::pipe();
-        self.rdedup_repo.read(version.to_string().as_ref(), &mut write, &self.decrypt_handle)?;
+        self.rdedup_repo.read(version.get_version(), &mut write, &self.decrypt_handle)?;
         tar::Archive::new(read).unpack(root)
     }
 

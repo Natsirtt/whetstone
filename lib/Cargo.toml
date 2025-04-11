@@ -5,9 +5,10 @@ edition = "2024"
 license = "MIT"
 
 [features]
-default = []
 with-perforce = [ "p4-cmd" ]
 with-rdedup = [ "rdedup-lib" ]
+with-default-infrastructure = [ "with-rdedup", "with-perforce" ]
+default = [ "with-default-infrastructure" ]
 
 [lib]
 name = "whetstone_lib"
@@ -30,6 +31,5 @@ serde = { version = "1.0", features = ["derive"] }
 serde_yaml = "0.8"
 p4-cmd = { git = "https://github.com/Natsirtt/p4-cmd.git", optional = true }
 rdedup-lib = { git = "https://github.com/Natsirtt/rdedup.git", features = ["default"], optional = true }
-tempfile = "3.19"
 tar = "0.4"
 pipe = "0.4.0"

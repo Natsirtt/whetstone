@@ -27,20 +27,33 @@ fn get_temp_directory<P: AsRef<Path>>(root: P) -> PathBuf {
     get_directory(root).join(DIRECTORY).join(TMP_DIRECTORY)
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone, Eq, PartialEq)]
+pub struct ModuleID(String);
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct InfrastructureID(String);
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub enum Infrastructure {
+    Default,
+    Custom(InfrastructureID),
+}
+
 /// A representation of a valid Whetstone project.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Project {
     pub(crate) name: String,
-    // Root modules initiate sync chains.
-    pub(crate) root_modules: Vec<String>,
-    pub(crate) modules: Vec<String>,
+    pub(crate) infrastructure: Infrastructure,
+    pub(crate) main_module: ModuleID,
+    pub(crate) modules: Vec<ModuleID>,
 }
 
 impl Project {
-    pub fn new(name: String, root_modules: Vec<String>, modules: Vec<String>) -> io::Result<Self> {
+    pub fn new(name: String, infrastructure: Infrastructure, main_module: ModuleID, modules: Vec<ModuleID>) -> io::Result<Self> {
         Ok(Project {
             name,
-            root_modules,
+            infrastructure,
+            main_module,
             modules,
         })
     }
@@ -82,9 +95,6 @@ pub enum Engine {
     Perforce(perforce::StreamDefinition),
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct ModuleID(String);
-
 impl Display for ModuleID {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.0)
@@ -104,11 +114,11 @@ pub struct Module {
 }
 
 impl Module {
-    fn get_config_file<P: AsRef<Path>>(&self, root_path: P) -> PathBuf {
-        get_directory(root_path).join(format!("{}.yml", self.name))
+    fn get_config_file<P: AsRef<Path>>(root_path: P, id: &ModuleID) -> PathBuf {
+        get_directory(root_path).join(format!("{}.yml", id.0.as_str()))
     }
-    pub fn read_from_config<P: AsRef<Path>>(&self, root_path: P) -> io::Result<Self> {
-        let file = self.get_config_file(root_path);
+    pub fn read_from_config<P: AsRef<Path>>(root_path: P, id: &ModuleID) -> io::Result<Self> {
+        let file = Module::get_config_file(root_path, id);
         if !Path::is_file(&file) {
             return Err(io::Error::new(io::ErrorKind::NotFound, format!("Could not find file {}", file.to_string_lossy())));
         }
@@ -120,7 +130,7 @@ impl Module {
     }
 
     pub fn write_to_config<P: AsRef<Path>>(&self, root_path: P) -> io::Result<()> {
-        let file = self.get_config_file(root_path);
+        let file = Module::get_config_file(root_path, &self.name);
         fs::write(file, serde_yaml::to_string(self).map_err(|e| {
             io::Error::new(io::ErrorKind::InvalidData, format!("Failed to write module config to disk: {}", e))
         })?.as_bytes())
