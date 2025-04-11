@@ -66,9 +66,6 @@ fn run() -> io::Result<()> {
 
     match args.command {
         Command::Sync(sub_args) => {
-            let project = whetstone::open_project(args.directory)?;
-            println!("{:?}", project);
-            println!("Sync. Force? {}", sub_args.force);
         }
     }
 

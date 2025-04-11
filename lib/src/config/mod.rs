@@ -6,9 +6,10 @@ pub mod rdedup;
 pub mod perforce;
 
 use std::{fs, io};
+use std::fmt::{Display, Formatter};
 use std::path::{Path, PathBuf};
+use std::str::FromStr;
 use serde::{Deserialize, Serialize};
-use crate::config;
 
 const DIRECTORY: &str = ".whetstone";
 const TMP_DIRECTORY: &str = "tmp";
@@ -82,8 +83,23 @@ pub enum Engine {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct ModuleID(String);
+
+impl Display for ModuleID {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl From<&str> for ModuleID {
+    fn from(value: &str) -> Self {
+        ModuleID(value.to_owned())
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Module {
-    pub name: String,
+    pub name: ModuleID,
     pub engine: Engine,
 }
 

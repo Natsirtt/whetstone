@@ -1,11 +1,11 @@
 use std::io;
-use std::io::BufWriter;
 use std::io::ErrorKind::InvalidData;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::sync::Arc;
-use crate::{Engine, EngineWorker, ModuleVersion, Version};
+use crate::ModuleVersion;
 use crate::config::rdedup;
 use crate::config::rdedup::{CachingStrategy, Repository};
+use crate::engines::{Engine, EngineWorker};
 
 #[cfg(feature = "with-rdedup")]
 pub struct Rdedup {
@@ -66,9 +66,9 @@ impl Engine for Rdedup {
 }
 
 impl EngineWorker for RdedupWorker {
-    fn sync(&self, root: &PathBuf, version: ModuleVersion, force: bool) -> io::Result<()> {
+    fn sync(&self, root: &PathBuf, version: &dyn ModuleVersion, force: bool) -> io::Result<()> {
         let (read, mut write) = pipe::pipe();
-        self.rdedup_repo.read(version.0.as_str(), &mut write, &self.decrypt_handle)?;
+        self.rdedup_repo.read(version.to_string().as_ref(), &mut write, &self.decrypt_handle)?;
         tar::Archive::new(read).unpack(root)
     }
 
