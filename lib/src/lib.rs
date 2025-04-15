@@ -11,7 +11,7 @@ use infrastructure::ModuleVersion;
 use crate::infrastructure::Infrastructure;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-struct Version(String);
+pub struct Version(String);
 
 impl Display for Version {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {

@@ -27,8 +27,8 @@ pub enum Repository {
 #[cfg(feature = "with-rdedup")]
 pub struct Config {
     /// The root directory where the reconstituted tar file will be unarchived at, relative to the root of the project.
-    /// So to untar at the root, use "."
-    pub root: PathBuf,
+    /// So to untar at the root of the project, use "."
+    pub path: PathBuf,
     /// The rdedup repository to get data from
     pub repository: Repository,
 }

@@ -1,4 +1,3 @@
-use std::fmt::Display;
 use std::io;
 use std::io::Error;
 use crate::config::ModuleID;
@@ -37,6 +36,8 @@ impl Infrastructure for DatabaseInfrastructure {
     fn get_name(&self) -> &'static str {
         DEFAULT_INFRASTRUCTURE_NAME
     }
+
+
 
     fn get_version_for_module(&self, module: &ModuleID, version: &Version) -> io::Result<ModuleVersion> {
         Ok(ModuleVersion {

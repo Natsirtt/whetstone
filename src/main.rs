@@ -48,7 +48,7 @@ fn run() -> io::Result<()> {
     let binaries_module: Module = Module {
         name: "Binaries".into(),
         engine: Engine::Rdedup(config::rdedup::Config {
-        root: ".".into(),
+        path: ".".into(),
             repository: Repository::HttpServer {
                 url: Url::parse("https://buildstore.knifeedgestudios.com/nush/").unwrap().into(),
                 caching_strategy: CachingStrategy::Local {

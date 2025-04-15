@@ -36,7 +36,7 @@ impl Engine for Perforce {
 impl EngineWorker for PerforceWorker {
     fn sync(&self, root: &PathBuf, version: &ModuleVersion, force: bool) -> std::io::Result<()> {
         // TODO whetstone error domain
-        self.p4.sync(format!("...@{}", version.get_version()).as_str()).force(force).run().map(|_| ()).map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))
+        self.p4.sync(root.join(format!("...@{}", version.get_version())).to_str().unwrap()).force(force).run().map(|_| ()).map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))
     }
 
     fn test_connection(&self) -> std::io::Result<()> {

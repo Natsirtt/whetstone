@@ -8,10 +8,10 @@ pub mod perforce;
 use std::{fs, io};
 use std::fmt::{Display, Formatter};
 use std::path::{Path, PathBuf};
-use std::str::FromStr;
 use serde::{Deserialize, Serialize};
 
 const DIRECTORY: &str = ".whetstone";
+#[allow(dead_code)]
 const TMP_DIRECTORY: &str = "tmp";
 const CONFIG_FILE: &str = "Whetstone.yml";
 
@@ -23,6 +23,7 @@ fn get_main_file<P: AsRef<Path>>(root: P) -> PathBuf {
     get_directory(root).join(CONFIG_FILE)
 }
 
+#[allow(dead_code)]
 fn get_temp_directory<P: AsRef<Path>>(root: P) -> PathBuf {
     get_directory(root).join(DIRECTORY).join(TMP_DIRECTORY)
 }
@@ -44,7 +45,6 @@ pub enum Infrastructure {
 pub struct Project {
     pub(crate) name: String,
     pub(crate) infrastructure: Infrastructure,
-    pub(crate) main_module: ModuleID,
     pub(crate) modules: Vec<ModuleID>,
 }
 
@@ -53,7 +53,6 @@ impl Project {
         Ok(Project {
             name,
             infrastructure,
-            main_module,
             modules,
         })
     }
