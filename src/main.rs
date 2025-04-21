@@ -7,6 +7,7 @@ use whetstone::config::Module;
 use whetstone::config::rdedup::{CachingStrategy, Repository};
 use whetstone::config::perforce::StreamDefinition;
 use whetstone_lib::{config, Project};
+use whetstone_lib::config::Dependency;
 
 #[derive(Debug, Parser)]
 #[clap(about = "Heterogeneous project dependencies manager. Keep your projects sharply up-to-date!")]
@@ -33,13 +34,14 @@ enum Command {
 fn run() -> io::Result<()> {
     let args = CliArgs::parse();
 
-    let foo = whetstone::config::Project::new("Nush".to_string(), config::Infrastructure::Default, "Binaries".into(), vec![
+    let foo = whetstone::config::Project::new("Nush".to_string(), config::Infrastructure::Default, vec![
             "Content".into(),
             "Binaries".into(),
     ])?;
     foo.write_to_config(&args.directory)?;
     let content_module = Module {
         name: "Content".into(),
+        dependencies: vec![Dependency { module: "Binaries".into() }],
         engine: Engine::Perforce(StreamDefinition {
             port: "ssl:vcs.knifeedgestudios.com".into(),
             stream: "//nush/unstable/dev".into(),
@@ -47,8 +49,9 @@ fn run() -> io::Result<()> {
     };
     let binaries_module: Module = Module {
         name: "Binaries".into(),
+        dependencies: vec![],
         engine: Engine::Rdedup(config::rdedup::Config {
-        path: ".".into(),
+            path: ".".into(),
             repository: Repository::HttpServer {
                 url: Url::parse("https://buildstore.knifeedgestudios.com/nush/").unwrap().into(),
                 caching_strategy: CachingStrategy::Local {

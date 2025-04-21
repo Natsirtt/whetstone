@@ -28,7 +28,7 @@ fn get_temp_directory<P: AsRef<Path>>(root: P) -> PathBuf {
     get_directory(root).join(DIRECTORY).join(TMP_DIRECTORY)
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, Eq, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Hash, Clone, Eq, PartialEq)]
 pub struct ModuleID(String);
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -49,7 +49,7 @@ pub struct Project {
 }
 
 impl Project {
-    pub fn new(name: String, infrastructure: Infrastructure, main_module: ModuleID, modules: Vec<ModuleID>) -> io::Result<Self> {
+    pub fn new(name: String, infrastructure: Infrastructure, modules: Vec<ModuleID>) -> io::Result<Self> {
         Ok(Project {
             name,
             infrastructure,
@@ -107,9 +107,15 @@ impl From<&str> for ModuleID {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Dependency {
+    pub module: ModuleID,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Module {
     pub name: ModuleID,
     pub engine: Engine,
+    pub dependencies: Vec<Dependency>,
 }
 
 impl Module {

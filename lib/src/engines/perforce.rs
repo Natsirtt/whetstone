@@ -1,7 +1,6 @@
 use std::path::PathBuf;
 use p4_cmd::P4;
-use crate::{config, Engine, EngineWorker};
-use crate::infrastructure::ModuleVersion;
+use crate::{config, Engine, EngineWorker, ModuleVersion};
 
 // TODO get client from a user-config; but not from whetstone shared config! And possibly other perforce settings why not.
 // TODO ditch p4_cmd lib which is weirdly designed and seems unmaintained; or bring it up to shape in fork

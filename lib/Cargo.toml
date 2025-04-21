@@ -7,8 +7,7 @@ license = "MIT"
 [features]
 with-perforce = [ "p4-cmd" ]
 with-rdedup = [ "rdedup-lib" ]
-with-default-infrastructure = [ "with-rdedup", "with-perforce" ]
-default = [ "with-default-infrastructure" ]
+default = [ "with-perforce", "with-rdedup" ]
 
 [lib]
 name = "whetstone_lib"
